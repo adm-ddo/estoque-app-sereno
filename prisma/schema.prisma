@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LocalArmazenamento {
+  FREEZER
+  GELADEIRA
+  ESTOQUE_SECO
+  EMBALAGENS
+  PRODUTOS_LIMPEZA
+  BEBIDAS
+  HORTIFRUTI
+  MATERIAL_ESCRITORIO
+}
+
+model Restaurante {
+  id                          Int      @id @default(autoincrement())
+  nome                        String
+  cnpj                        String
+  endereco                    String
+  logo                        String?
+  responsavelComprasNome      String?
+  responsavelComprasTelefone  String?
+  responsavelComprasNome2     String?
+  responsavelComprasTelefone2 String?
+  frequenciaEstoquePadraoDias Int      @default(7)
+  tokenContagem               String   @unique
+  criadoEm                    DateTime @default(now())
+
+  usuarios      UsuarioRestaurante[]
+  produtos      Produto[]
+  fornecedores  Fornecedor[]
+  contagens     Contagem[]
+  sessoesAtivas Sessao[]             @relation("RestauranteAtivo")
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  senhaHash    String
+  nomeCompleto String?
+  cpf          String?  @unique
+  telefone     String?
+  isMaster     Boolean  @default(false)
+  criadoEm     DateTime @default(now())
+
+  empresas UsuarioRestaurante[]
+  sessoes  Sessao[]
+}
+
+model UsuarioRestaurante {
+  id            Int      @id @default(autoincrement())
+  usuarioId     Int
+  restauranteId Int
+  criadoEm      DateTime @default(now())
+
+  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  restaurante Restaurante @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, restauranteId])
+}
+
+model Sessao {
+  id                 Int      @id @default(autoincrement())
+  token              String   @unique
+  usuarioId          Int
+  restauranteAtivoId Int?
+  criadoEm           DateTime @default(now())
+  expiraEm           DateTime
+
+  usuario          Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  restauranteAtivo Restaurante? @relation("RestauranteAtivo", fields: [restauranteAtivoId], references: [id], onDelete: SetNull)
+}
+
+model Produto {
+  id                      Int                @id @default(autoincrement())
+  restauranteId           Int
+  nome                    String
+  unidade                 String             @default("UN")
+  estoqueRegulador        Float              @default(0)
+  local                   LocalArmazenamento @default(ESTOQUE_SECO)
+  preco                   Float?
+  precoAtualizadoEm       DateTime?
+  unidadeCompraLabel      String?
+  unidadeCompraQuantidade Float?
+  precoCompra             Float?
+  /// Nota livre sobre a embalagem (ex: "2,2kg peso bruto / 1,4kg drenado")
+  /// que vai junto na mensagem do pedido pro fornecedor.
+  observacaoCompra        String?
+  frequenciaEstoqueDias   Int?
+  /// Produto sem estoque regulador confiável (ex: item de embalagem grande
+  /// que não dá pra fracionar) — o pedido é a quantidade que a pessoa
+  /// escreve direto, sem cálculo de déficit nenhum. Independente de
+  /// `pedidoRapido`: controla só o TIPO de campo (quantidade direta vs
+  /// contagem com regulador), não em qual tela o produto aparece.
+  pedidoDireto            Boolean            @default(false)
+  /// Produto elegível pra tela separada "Pedido Rápido" — sai da Ordem de
+  /// Compra semanal normal e só aparece nesse atalho, sem trava de ciclo
+  /// (pode ser pedido/contado a qualquer dia). Pode ou não ser também
+  /// `pedidoDireto`: um item pedidoRapido ainda pode precisar de contagem
+  /// normal com regulador (ex: salmão numa sushi house).
+  pedidoRapido            Boolean            @default(false)
+  criadoEm                DateTime           @default(now())
+
+  restaurante     Restaurante         @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+  fornecedores    ProdutoFornecedor[]
+  itensContagem   ContagemItem[]
+  historicoPrecos ProdutoPreco[]
+
+  @@index([restauranteId])
+}
+
+model ProdutoPreco {
+  id        Int      @id @default(autoincrement())
+  produtoId Int
+  preco     Float
+  criadoEm  DateTime @default(now())
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId])
+}
+
+model Fornecedor {
+  id            Int      @id @default(autoincrement())
+  restauranteId Int
+  nome          String
+  documento     String
+  contatoNome   String?
+  telefone      String?
+  criadoEm      DateTime @default(now())
+
+  restaurante Restaurante         @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+  produtos    ProdutoFornecedor[]
+
+  @@index([restauranteId])
+}
+
+model ProdutoFornecedor {
+  id           Int      @id @default(autoincrement())
+  produtoId    Int
+  fornecedorId Int
+  preco        Float?
+
+  produto      Produto    @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  fornecedor   Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, fornecedorId])
+}
+
+model Contagem {
+  id            Int                 @id @default(autoincrement())
+  restauranteId Int
+  data          DateTime            @default(now())
+  pdfLista      Bytes?
+  pdfGeradoEm   DateTime?
+  /// Nulo = contagem completa (todos os produtos) ou Pedido Rápido (ver
+  /// `pedidoRapido`). Preenchido = contagem restrita a um local.
+  local         LocalArmazenamento?
+  /// true = essa contagem é uma sessão de Pedido Rápido (produtos com
+  /// Produto.pedidoRapido=true) — fora do ritmo semanal normal.
+  pedidoRapido  Boolean             @default(false)
+
+  restaurante Restaurante    @relation(fields: [restauranteId], references: [id], onDelete: Cascade)
+  itens       ContagemItem[]
+
+  @@index([restauranteId])
+}
+
+model ContagemItem {
+  id                Int      @id @default(autoincrement())
+  contagemId        Int
+  produtoId         Int
+  quantidadeContada Float
+
+  contagem          Contagem @relation(fields: [contagemId], references: [id], onDelete: Cascade)
+  produto           Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@unique([contagemId, produtoId])
+}
+
+/** Sugestões/dúvidas/críticas mandadas pelos usuários. Dados do remetente
+ * ficam "congelados" no momento do envio (não são uma relação) pra sobreviver
+ * mesmo se o usuário ou restaurante forem apagados depois. */
+model Feedback {
+  id              Int      @id @default(autoincrement())
+  tipo            String
+  mensagem        String
+  usuarioNome     String?
+  usuarioEmail    String?
+  usuarioTelefone String?
+  restauranteNome String?
+  lida            Boolean  @default(false)
+  criadoEm        DateTime @default(now())
+}
