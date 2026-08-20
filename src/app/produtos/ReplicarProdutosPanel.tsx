@@ -18,13 +18,11 @@ export default function ReplicarProdutosPanel({
   const [destino, setDestino] = useState(
     outrasLojas[0] ? String(outrasLojas[0].id) : ""
   );
-  const [modo, setModo] = useState<"todos" | "categorias" | "individual">(
+  const [modo, setModo] = useState<"todos" | "categorias" | "selecionados">(
     "todos"
   );
   const [categorias, setCategorias] = useState<Set<LocalArmazenamento>>(new Set());
-  const [produtoId, setProdutoId] = useState(
-    produtos[0] ? String(produtos[0].id) : ""
-  );
+  const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [pending, startTransition] = useTransition();
   const [mensagem, setMensagem] = useState<
     { tipo: "ok" | "erro"; texto: string } | null
@@ -37,6 +35,15 @@ export default function ReplicarProdutosPanel({
       const novo = new Set(atual);
       if (novo.has(local)) novo.delete(local);
       else novo.add(local);
+      return novo;
+    });
+  }
+
+  function alternarProduto(id: number) {
+    setSelecionados((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(id)) novo.delete(id);
+      else novo.add(id);
       return novo;
     });
   }
@@ -56,6 +63,7 @@ export default function ReplicarProdutosPanel({
   function replicar() {
     if (!destino) return;
     if (modo === "categorias" && categorias.size === 0) return;
+    if (modo === "selecionados" && selecionados.size === 0) return;
     setMensagem(null);
     startTransition(async () => {
       const formData = new FormData();
@@ -64,7 +72,9 @@ export default function ReplicarProdutosPanel({
       if (modo === "categorias") {
         for (const local of categorias) formData.append("locais", local);
       }
-      if (modo === "individual") formData.set("produtoId", produtoId);
+      if (modo === "selecionados") {
+        for (const id of selecionados) formData.append("produtoIds", String(id));
+      }
 
       const resultado = await replicarProdutos(formData);
       if ("erro" in resultado) {
@@ -136,10 +146,10 @@ export default function ReplicarProdutosPanel({
           <label className="flex items-center gap-1.5">
             <input
               type="radio"
-              checked={modo === "individual"}
-              onChange={() => setModo("individual")}
+              checked={modo === "selecionados"}
+              onChange={() => setModo("selecionados")}
             />
-            Um produto
+            Selecionar produtos
           </label>
         </div>
       </div>
@@ -160,24 +170,51 @@ export default function ReplicarProdutosPanel({
         </div>
       )}
 
-      {modo === "individual" && (
-        <select
-          value={produtoId}
-          onChange={(e) => setProdutoId(e.target.value)}
-          className="border border-stone-300 rounded-lg px-2 py-1.5 text-sm self-start"
-        >
-          {produtos.map((produto) => (
-            <option key={produto.id} value={produto.id}>
-              {produto.nome}
-            </option>
-          ))}
-        </select>
+      {modo === "selecionados" && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between text-xs text-stone-500">
+            <span>{selecionados.size} de {produtos.length} selecionado(s)</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setSelecionados(new Set(produtos.map((p) => p.id)))}
+                className="text-emerald-700 hover:underline"
+              >
+                Marcar todos
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelecionados(new Set())}
+                className="text-stone-500 hover:underline"
+              >
+                Limpar
+              </button>
+            </div>
+          </div>
+          <div className="max-h-56 overflow-y-auto rounded-lg border border-stone-200 p-2 flex flex-col gap-1">
+            {produtos.map((produto) => (
+              <label key={produto.id} className="flex items-center gap-1.5 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selecionados.has(produto.id)}
+                  onChange={() => alternarProduto(produto.id)}
+                  className="accent-emerald-600"
+                />
+                {produto.nome}
+              </label>
+            ))}
+          </div>
+        </div>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          disabled={pending || (modo === "categorias" && categorias.size === 0)}
+          disabled={
+            pending ||
+            (modo === "categorias" && categorias.size === 0) ||
+            (modo === "selecionados" && selecionados.size === 0)
+          }
           onClick={replicar}
           className="self-start rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-1.5 font-medium transition-colors disabled:opacity-50"
         >

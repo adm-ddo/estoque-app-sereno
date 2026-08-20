@@ -225,16 +225,19 @@ export async function replicarProdutos(
   const modo = String(formData.get("modo") ?? "");
   const where: {
     restauranteId: number;
-    id?: number;
+    id?: number | { in: number[] };
     local?: LocalArmazenamento | { in: LocalArmazenamento[] };
   } = {
     restauranteId: sessao.restauranteEfetivoId,
   };
 
-  if (modo === "individual") {
-    const produtoId = Number(formData.get("produtoId") ?? NaN);
-    if (Number.isNaN(produtoId)) return { erro: "Escolha um produto." };
-    where.id = produtoId;
+  if (modo === "selecionados") {
+    const produtoIds = formData
+      .getAll("produtoIds")
+      .map((v) => Number(v))
+      .filter((v) => !Number.isNaN(v));
+    if (produtoIds.length === 0) return { erro: "Escolha pelo menos um produto." };
+    where.id = { in: produtoIds };
   } else if (modo === "categorias") {
     const locais = formData
       .getAll("locais")
