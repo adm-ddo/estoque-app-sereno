@@ -86,7 +86,7 @@ export default function ContagemInput({
             : "border-stone-300 text-stone-500 hover:bg-stone-50"
         }`}
       >
-        {confirmadoZerado ? "✓ Zerado" : "Zerado"}
+        {confirmadoZerado ? "✓ Zerado" : "Marcar zero"}
       </button>
     </div>
   );
