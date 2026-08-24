@@ -155,6 +155,24 @@ export default function NovoProdutoForm({
             pessoa escrever.
           </p>
         </div>
+        {pedidoDireto && (
+          <div className="flex flex-col">
+            <label className="text-xs text-stone-500">
+              Pedido mínimo (opcional)
+            </label>
+            <input
+              name="pedidoMinimo"
+              type="number"
+              step="any"
+              placeholder="Ex: 5"
+              className="border border-stone-300 rounded-lg px-2 py-1.5 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <p className="text-xs text-stone-400 max-w-32 mt-0.5">
+              Se souber, quanto o fornecedor exige/entrega no mínimo — já vem
+              preenchido na contagem.
+            </p>
+          </div>
+        )}
         <div className="flex flex-col">
           <label className="text-xs text-stone-500 flex items-center gap-1.5 h-[18px]">
             <input

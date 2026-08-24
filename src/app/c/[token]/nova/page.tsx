@@ -95,7 +95,8 @@ export default async function NovaContagemPublicaPage({
     const status = statusCiclo?.get(p.id);
     return {
       ...p,
-      quantidadeInicial: quantidadesIniciais?.get(p.id) ?? null,
+      quantidadeInicial:
+        quantidadesIniciais?.get(p.id) ?? (p.pedidoDireto ? p.pedidoMinimo : null),
       destacarAtencao: frequenciaEfetiva > baselineDias,
       avisoCiclo:
         status?.jaContadoNoCiclo && status.ultimaContagemData

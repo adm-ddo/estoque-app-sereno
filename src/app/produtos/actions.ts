@@ -95,6 +95,7 @@ export async function createProduto(formData: FormData) {
   const frequenciaEstoqueDias = parseNumeroOpcional(formData, "frequenciaEstoqueDias");
   const local = parseLocal(formData);
   const pedidoDireto = parseCheckbox(formData, "pedidoDireto");
+  const pedidoMinimo = parseNumeroOpcional(formData, "pedidoMinimo");
   const pedidoRapido = parseCheckbox(formData, "pedidoRapido");
   const infoPreco = parseInfoPreco(formData);
   const confirmarDuplicado = formData.get("confirmarDuplicado") === "true";
@@ -123,6 +124,7 @@ export async function createProduto(formData: FormData) {
       frequenciaEstoqueDias,
       local,
       pedidoDireto,
+      pedidoMinimo,
       pedidoRapido,
       restauranteId: sessao.restauranteEfetivoId,
       unidadeCompraLabel: infoPreco.unidadeCompraLabel,
@@ -146,6 +148,7 @@ export async function updateProduto(id: number, formData: FormData) {
   const frequenciaEstoqueDias = parseNumeroOpcional(formData, "frequenciaEstoqueDias");
   const local = parseLocal(formData);
   const pedidoDireto = parseCheckbox(formData, "pedidoDireto");
+  const pedidoMinimo = parseNumeroOpcional(formData, "pedidoMinimo");
   const pedidoRapido = parseCheckbox(formData, "pedidoRapido");
   const infoPreco = parseInfoPreco(formData);
 
@@ -175,6 +178,7 @@ export async function updateProduto(id: number, formData: FormData) {
       frequenciaEstoqueDias,
       local,
       pedidoDireto,
+      pedidoMinimo,
       pedidoRapido,
       preco: infoPreco.preco,
       unidadeCompraLabel: infoPreco.unidadeCompraLabel,
@@ -282,6 +286,7 @@ export async function replicarProdutos(
           estoqueRegulador: produto.estoqueRegulador,
           frequenciaEstoqueDias: produto.frequenciaEstoqueDias,
           pedidoDireto: produto.pedidoDireto,
+          pedidoMinimo: produto.pedidoMinimo,
           pedidoRapido: produto.pedidoRapido,
           restauranteId: restauranteDestinoId,
           unidadeCompraLabel: produto.unidadeCompraLabel,

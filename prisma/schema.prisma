@@ -102,6 +102,11 @@ model Produto {
   /// `pedidoRapido`: controla só o TIPO de campo (quantidade direta vs
   /// contagem com regulador), não em qual tela o produto aparece.
   pedidoDireto            Boolean            @default(false)
+  /// Só usado quando `pedidoDireto=true`: quantidade mínima que o
+  /// fornecedor exige/entrega nesse pedido (ex: caixa fechada de 5), se
+  /// conhecida. Pré-preenche o campo de pedido com esse valor em vez de
+  /// vazio — a pessoa ainda pode ajustar ou zerar ("Não pedir").
+  pedidoMinimo            Float?
   /// Produto elegível pra tela separada "Pedido Rápido" — sai da Ordem de
   /// Compra semanal normal e só aparece nesse atalho, sem trava de ciclo
   /// (pode ser pedido/contado a qualquer dia). Pode ou não ser também

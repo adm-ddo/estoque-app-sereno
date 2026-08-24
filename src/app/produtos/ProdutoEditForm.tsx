@@ -14,6 +14,7 @@ export type ProdutoParaEditar = {
   estoqueRegulador: number;
   local: LocalArmazenamento;
   pedidoDireto: boolean;
+  pedidoMinimo: number | null;
   pedidoRapido: boolean;
   preco: number | null;
   unidadeCompraLabel: string | null;
@@ -123,6 +124,19 @@ export default function ProdutoEditForm({
           pessoa escrever.
         </p>
       </div>
+      {pedidoDireto && (
+        <div className="flex flex-col">
+          <label className="text-xs text-stone-500">Pedido mínimo</label>
+          <input
+            name="pedidoMinimo"
+            type="number"
+            step="any"
+            defaultValue={produto.pedidoMinimo ?? ""}
+            placeholder="Ex: 5"
+            className="border border-stone-300 rounded-lg px-2 py-1 text-sm w-24"
+          />
+        </div>
+      )}
       <div className="flex flex-col">
         <label className="text-xs text-stone-500 flex items-center gap-1.5 h-[18px]">
           <input

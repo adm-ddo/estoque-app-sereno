@@ -46,7 +46,11 @@ export default function ProdutoCard({
         </span>
         <p className="text-sm text-stone-600 mt-1.5">
           {produto.pedidoDireto ? (
-            "pedido direto, sem estoque regulador"
+            produto.pedidoMinimo != null ? (
+              <>pedido direto · mínimo {produto.pedidoMinimo} {produto.unidade}</>
+            ) : (
+              "pedido direto, sem estoque regulador"
+            )
           ) : (
             <>
               {produto.estoqueRegulador} {produto.unidade} · estoque regulador

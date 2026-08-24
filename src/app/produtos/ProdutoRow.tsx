@@ -50,7 +50,10 @@ export default function ProdutoRow({
       <td className="p-2">{produto.unidade}</td>
       <td className="p-2">
         {produto.pedidoDireto ? (
-          <span className="text-stone-400">— pedido direto</span>
+          <span className="text-stone-400">
+            — pedido direto
+            {produto.pedidoMinimo != null && ` · mín. ${produto.pedidoMinimo}`}
+          </span>
         ) : (
           produto.estoqueRegulador
         )}
