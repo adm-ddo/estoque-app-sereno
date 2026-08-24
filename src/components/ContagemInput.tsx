@@ -7,6 +7,7 @@ export default function ContagemInput({
   unidade,
   valorInicial,
   avisoTexto,
+  pedidoDireto = false,
 }: {
   name: string;
   unidade: string;
@@ -15,6 +16,9 @@ export default function ContagemInput({
    * em 28/07 · Quinzenal") em vez dos controles normais — a pessoa precisa
    * clicar em "Contar mesmo assim" pra destravar. */
   avisoTexto?: string | null;
+  /** Produto sem estoque regulador: o valor aqui é a quantidade a pedir,
+   * não uma contagem de estoque — muda o texto do atalho de zerar. */
+  pedidoDireto?: boolean;
 }) {
   const [valor, setValor] = useState(
     valorInicial != null ? String(valorInicial) : ""
@@ -86,7 +90,13 @@ export default function ContagemInput({
             : "border-stone-300 text-stone-500 hover:bg-stone-50"
         }`}
       >
-        {confirmadoZerado ? "✓ Zerado" : "Marcar zero"}
+        {pedidoDireto
+          ? confirmadoZerado
+            ? "✓ Não pedir"
+            : "Não pedir"
+          : confirmadoZerado
+            ? "✓ Zerado"
+            : "Marcar zero"}
       </button>
     </div>
   );

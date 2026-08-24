@@ -93,6 +93,7 @@ export default function ContagemFormFields({
                     unidade={produto.unidade}
                     valorInicial={produto.quantidadeInicial}
                     avisoTexto={produto.avisoCiclo}
+                    pedidoDireto={produto.pedidoDireto}
                   />
                 </div>
               ))}
