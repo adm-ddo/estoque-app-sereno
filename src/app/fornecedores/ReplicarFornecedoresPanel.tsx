@@ -14,9 +14,7 @@ export default function ReplicarFornecedoresPanel({
   outrasLojas: Loja[];
 }) {
   const [aberto, setAberto] = useState(false);
-  const [destino, setDestino] = useState(
-    outrasLojas[0] ? String(outrasLojas[0].id) : ""
-  );
+  const [destino, setDestino] = useState("");
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [pending, startTransition] = useTransition();
   const [mensagem, setMensagem] = useState<
@@ -110,6 +108,9 @@ export default function ReplicarFornecedoresPanel({
           }}
           className="border border-stone-300 rounded-lg px-2 py-1.5 text-sm self-start"
         >
+          <option value="" disabled>
+            Selecione a loja...
+          </option>
           {outrasLojas.map((loja) => (
             <option key={loja.id} value={loja.id}>
               {loja.nome}
@@ -147,7 +148,7 @@ export default function ReplicarFornecedoresPanel({
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          disabled={pending || selecionados.size === 0}
+          disabled={pending || !destino || selecionados.size === 0}
           onClick={replicar}
           className="self-start rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-1.5 font-medium transition-colors disabled:opacity-50"
         >

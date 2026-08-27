@@ -15,9 +15,7 @@ export default function ReplicarProdutosPanel({
   outrasLojas: Loja[];
 }) {
   const [aberto, setAberto] = useState(false);
-  const [destino, setDestino] = useState(
-    outrasLojas[0] ? String(outrasLojas[0].id) : ""
-  );
+  const [destino, setDestino] = useState("");
   const [modo, setModo] = useState<"todos" | "categorias" | "selecionados">(
     "todos"
   );
@@ -116,6 +114,9 @@ export default function ReplicarProdutosPanel({
           }}
           className="border border-stone-300 rounded-lg px-2 py-1.5 text-sm"
         >
+          <option value="" disabled>
+            Selecione a loja...
+          </option>
           {outrasLojas.map((loja) => (
             <option key={loja.id} value={loja.id}>
               {loja.nome}
@@ -212,6 +213,7 @@ export default function ReplicarProdutosPanel({
           type="button"
           disabled={
             pending ||
+            !destino ||
             (modo === "categorias" && categorias.size === 0) ||
             (modo === "selecionados" && selecionados.size === 0)
           }
