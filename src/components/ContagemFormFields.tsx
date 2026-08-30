@@ -55,7 +55,7 @@ export default function ContagemFormFields({
               <span className="text-base">{info.emoji}</span>
               {info.label}
             </h2>
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               {grupo.produtos.map((produto) => (
                 <div
                   key={produto.id}
@@ -103,7 +103,7 @@ export default function ContagemFormFields({
       })}
 
       <div className="fixed bottom-0 left-0 right-0 border-t border-stone-200 bg-white/95 backdrop-blur px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-5xl">
           <BotaoSubmitContagem pedidoRapido={pedidoRapido} />
         </div>
       </div>
