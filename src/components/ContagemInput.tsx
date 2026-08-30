@@ -95,8 +95,8 @@ export default function ContagemInput({
             ? "✓ Não pedir"
             : "Não pedir"
           : confirmadoZerado
-            ? "✓ Zerado"
-            : "Marcar zero"}
+            ? "✓ Estoque zerado"
+            : "Marcar estoque zerado"}
       </button>
     </div>
   );
